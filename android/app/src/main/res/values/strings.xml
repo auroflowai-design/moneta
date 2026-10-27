@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Moneta</string>
+    <string name="title_activity_main">Moneta</string>
+    <string name="package_name">com.moneta.personalfinance</string>
+    <string name="custom_url_scheme">com.moneta.personalfinance</string>
+</resources>

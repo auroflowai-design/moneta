@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f4f2">
+<meta name="description" content="Moneta is a private, offline-first journal ledger. Date, particulars, debit, credit — recorded on your device.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Moneta">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+<title>Moneta · Journal ledger</title>
+<script>
+  (function () {
+    window.__monetaBootAt = performance.now();
+    try {
+      var mode = localStorage.getItem('moneta-theme-mode');
+      if (!mode) {
+        var legacy = localStorage.getItem('moneta-theme');
+        mode = legacy === 'light' ? 'light' : legacy === 'dark' ? 'dark' : 'system';
+      }
+      var resolved = mode === 'system'
+        ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+        : (mode === 'light' ? 'light' : 'dark');
+      document.documentElement.dataset.theme = resolved;
+      document.documentElement.dataset.themeMode = mode;
+      var color = resolved === 'light' ? '#f4f4f2' : '#0b0d10';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
+    } catch (error) {}
+  })();
+</script>
+</head>
+<body>
+
+<svg class="svg-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-ledger" viewBox="0 0 24 24"><path d="M5 5h14M5 12h9M5 19h14"/><path d="m17 9 3 3-3 3"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M13 16H8"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M12 16v5"/><path d="M16 14.639V21"/><path d="M20 10.656V21"/><path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"/><path d="M4 18.463V21"/><path d="M8 14.656V21"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 11h3.75a2 2 0 0 1 1.6.8l.45.6a4 4 0 0 0 6.4 0l.45-.6a2 2 0 0 1 1.6-.8H21"/><path d="M3 7h18"/><rect x="3" y="3" width="18" height="18" rx="2"/></symbol>
+  <symbol id="i-reports" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12.5 16V7M17 16v-8"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h8M16 7h4M4 17h2M10 17h10"/><circle cx="14" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="m4 20 4.2-1 10.6-10.6a2.1 2.1 0 0 0-3-3L5.2 16z"/><path d="m14.5 6.5 3 3"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.8A.8.8 0 0 1 9.8 4h4.4a.8.8 0 0 1 .8.8V7M7 7l.8 13h8.4L17 7"/><path d="M10 11v5M14 11v5"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 19h16"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4z"/><path d="M12 9v5M12 17.4v.2"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 15.2A8.2 8.2 0 0 1 8.8 4 8.5 8.5 0 1 0 20 15.2Z"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2.5"/><path d="M9 21h6M12 17v4"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h7l5 5v13H6z"/><path d="M13 3v5h5"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/><path d="M4 11.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="11" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/></symbol>
+  <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 4v16M4 16l4 4 4-4M16 20V4M12 8l4-4 4 4"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M19 12a7 7 0 0 0-11.9-5L4 10M5 12a7 7 0 0 0 11.9 5L20 14"/></symbol>
+  <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/></symbol>
+</svg>
+
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Moneta workspace">
+    <a class="brand" href="#overview" aria-label="Moneta overview">
+      <span class="brand-mark" aria-hidden="true">m</span>
+      <span class="brand-word">moneta</span>
+    </a>
+    <p class="sidebar-label">Workspace</p>
+    <nav class="side-nav" aria-label="Primary navigation">
+      <button class="side-link active" type="button" data-view="overview"><svg class="icon"><use href="#i-home"></use></svg><span>Home</span></button>
+      <button class="side-link" type="button" data-view="ledger"><svg class="icon"><use href="#i-receipt"></use></svg><span>Transactions</span></button>
+      <button class="side-link" type="button" data-view="reports"><svg class="icon"><use href="#i-chart"></use></svg><span>Analytics</span></button>
+      <button class="side-link" type="button" data-view="goals"><svg class="icon"><use href="#i-target"></use></svg><span>Goals</span></button>
+      <button class="side-link" type="button" data-view="accounts"><svg class="icon"><use href="#i-wallet"></use></svg><span>Accounts</span></button>
+    </nav>
+    <p class="sidebar-label sidebar-label-tools">Tools</p>
+    <nav class="side-nav side-nav-tools" aria-label="Workspace tools">
+      <button class="side-link" type="button" data-view="import"><svg class="icon"><use href="#i-upload"></use></svg><span>Import</span></button>
+      <button class="side-link" type="button" data-view="data"><svg class="icon"><use href="#i-database"></use></svg><span>Data</span></button>
+      <button class="side-link" type="button" data-view="settings"><svg class="icon"><use href="#i-settings"></use></svg><span>Settings</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="device-card">
+        <span class="device-pulse" aria-hidden="true"></span>
+        <div><strong>Stored on this device</strong><small><span id="sidebarEntryCount">0 entries</span> · schema v3</small></div>
+      </div>
+      <button class="side-theme" type="button" data-action="theme" aria-label="Change appearance">
+        <svg class="icon" data-theme-icon><use href="#i-monitor"></use></svg>
+        <span data-theme-label>System appearance</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <a class="topbar-brand" href="#overview" aria-label="Moneta overview"><span class="brand-mark" aria-hidden="true">m</span><span>moneta</span></a>
+      <div class="topbar-context">
+        <span class="topbar-date" data-today-label></span>
+        <span class="topbar-separator" aria-hidden="true"></span>
+        <span class="topbar-private"><svg class="icon"><use href="#i-lock"></use></svg> Private, offline-first</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" type="button" data-goto="settings" aria-label="Open settings"><svg class="icon"><use href="#i-settings"></use></svg></button>
+        <button class="icon-btn" type="button" data-action="theme" aria-label="Change appearance"><svg class="icon" data-theme-icon><use href="#i-monitor"></use></svg></button>
+        <button class="btn btn-primary topbar-add" type="button" data-action="add"><svg class="icon"><use href="#i-plus"></use></svg><span>Add entry</span></button>
+      </div>
+    </header>
+
+    <main class="main" id="mainContent">
+
+      <section class="view active" id="overviewView" data-view-panel="overview" aria-labelledby="overviewTitle">
+        <header class="page-head">
+          <div class="page-heading">
+            <p class="eyebrow">Your journal at a glance</p>
+            <h1 id="overviewTitle">Overview</h1>
+            <p class="page-sub">A clear picture of what came in and what went out.</p>
+          </div>
+          <div class="page-head-tools">
+            <div class="period-control" data-period-control>
+              <span class="period-icon"><svg class="icon"><use href="#i-calendar"></use></svg></span>
+              <div class="period-body">
+                <select class="period-select" data-period-preset aria-label="Reporting period"></select>
+                <span class="period-range" data-period-range></span>
+              </div>
+              <div class="period-custom" data-period-custom hidden>
+                <label><span>From</span><input type="date" data-period-from min="1900-01-01" max="2100-12-31"></label>
+                <span class="period-arrow" aria-hidden="true">→</span>
+                <label><span>To</span><input type="date" data-period-to min="1900-01-01" max="2100-12-31"></label>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <article class="overview-hero" aria-label="Period summary">
+          <div class="hero-orb hero-orb-a" aria-hidden="true"></div>
+          <div class="hero-orb hero-orb-b" aria-hidden="true"></div>
+          <div class="hero-copy">
+            <p class="hero-kicker">Current account balance <span class="hero-period" id="overviewOpeningCaption">Opening + all movement</span></p>
+            <p class="hero-value money" id="overviewBalance">₹0.00</p>
+            <p class="hero-note">Opening balance plus every credit, minus every debit in your journal.</p>
+            <div class="hero-actions">
+              <button class="btn btn-accent" type="button" data-action="add"><svg class="icon"><use href="#i-plus"></use></svg>New entry</button>
+              <button class="btn btn-ghost-on-dark" type="button" data-goto="ledger">Open ledger<svg class="icon"><use href="#i-arrow-right"></use></svg></button>
+            </div>
+          </div>
+          <div class="hero-metrics">
+            <p class="hero-metrics-kicker">Selected period <span data-range-label></span></p>
+            <div class="hero-metric"><span>Total debits</span><strong class="money" id="overviewDebit">₹0.00</strong></div>
+            <div class="hero-metric"><span>Total credits</span><strong class="money" id="overviewCredit">₹0.00</strong></div>
+            <div class="hero-metric"><span>Net movement</span><strong class="money" id="overviewNet">₹0.00</strong></div>
+            <div class="hero-metric"><span>Entries</span><strong class="money" id="overviewCount">0</strong></div>
+          </div>
+          <div class="hero-alltime">
+            <span class="hero-alltime-label">All time</span>
+            <span>Opening <strong class="money" id="overviewOpening">₹0.00</strong></span>
+            <span>Debits <strong class="money" id="overviewAllDebit">₹0.00</strong></span>
+            <span>Credits <strong class="money" id="overviewAllCredit">₹0.00</strong></span>
+            <span>Net <strong class="money" id="overviewAllNet">₹0.00</strong></span>
+          </div>
+        </article>
+
+        <div class="overview-grid">
+          <article class="panel chart-panel">
+            <div class="panel-head">
+              <div><h2>Movement</h2><p id="overviewChartCaption">Debits and credits in this period</p></div>
+              <span class="legend"><i class="legend-debit"></i>Debit <i class="legend-credit"></i>Credit</span>
+            </div>
+            <div class="bar-chart" id="overviewChart"></div>
+          </article>
+          <article class="panel split-panel">
+            <div class="panel-head"><div><h2>Debit / credit split</h2><p>How the period is balanced</p></div></div>
+            <div class="split-body">
+              <div class="donut" id="overviewDonut"><div class="donut-hole"><strong id="overviewDonutTotal" class="money">₹0</strong><small>movement</small></div></div>
+              <div class="split-legend" id="overviewSplitLegend"></div>
+            </div>
+          </article>
+        </div>
+
+        <article class="panel recent-panel">
+          <div class="panel-head">
+            <div><h2>Recent entries</h2><p>Your latest journal lines</p></div>
+            <div class="panel-head-actions">
+              <button class="btn btn-quiet" type="button" data-goto="import"><svg class="icon"><use href="#i-upload"></use></svg>Import</button>
+              <button class="btn btn-quiet" type="button" data-goto="ledger">View ledger<svg class="icon"><use href="#i-arrow-right"></use></svg></button>
+            </div>
+          </div>
+          <div id="recentList" class="recent-list"></div>
+        </article>
+      </section>
+
+      <section class="view" id="ledgerView" data-view-panel="ledger" aria-labelledby="ledgerTitle">
+        <header class="page-head">
+          <div class="page-heading">
+            <p class="eyebrow">Date · Particulars · Debit · Credit</p>
+            <h1 id="ledgerTitle">Ledger</h1>
+            <p class="page-sub">Every line in your journal, searchable and ready for review.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" type="button" data-goto="import"><svg class="icon"><use href="#i-upload"></use></svg>Import spreadsheet</button>
+            <button class="btn btn-primary" type="button" data-action="add"><svg class="icon"><use href="#i-plus"></use></svg>Add entry</button>
+          </div>
+        </header>
+
+        <div class="panel ledger-search-panel">
+          <div class="search-row">
+            <label class="search-field">
+              <svg class="icon"><use href="#i-search"></use></svg>
+              <span class="sr-only">Search transactions by text</span>
+              <input id="ledgerSearch" type="search" autocomplete="off" placeholder="Search transactions by text…">
+            </label>
+            <button class="icon-btn" type="button" id="clearSearch" aria-label="Clear search" hidden><svg class="icon"><use href="#i-close"></use></svg></button>
+            <button class="btn btn-quiet clear-filters" type="button" data-action="clear-filters" aria-label="Reset filters" title="Reset filters"><svg class="icon"><use href="#i-refresh"></use></svg><span>Reset</span></button>
+          </div>
+        </div>
+
+        <div class="summary-grid" aria-label="Filtered totals">
+          <article class="summary-card"><span>Entries</span><strong class="money" id="ledgerCount">0</strong><small>In this view</small></article>
+          <article class="summary-card"><span>Total debits</span><strong class="money debit-ink" id="ledgerDebit">₹0.00</strong><small>Money out</small></article>
+          <article class="summary-card"><span>Total credits</span><strong class="money credit-ink" id="ledgerCredit">₹0.00</strong><small>Money in</small></article>
+          <article class="summary-card summary-net"><span>Net movement</span><strong class="money" id="ledgerNet">₹0.00</strong><small>Credits − debits</small></article>
+        </div>
+
+        <div class="panel filter-panel">
+          <div class="filter-grid">
+            <label class="filter-field">
+              <span>Period</span>
+              <select id="ledgerPeriod" data-ledger-period></select>
+            </label>
+            <label class="filter-field">
+              <span>From date</span>
+              <input id="ledgerFrom" type="date" min="1900-01-01" max="2100-12-31">
+            </label>
+            <label class="filter-field">
+              <span>To date</span>
+              <input id="ledgerTo" type="date" min="1900-01-01" max="2100-12-31">
+            </label>
+            <div class="filter-field">
+              <span>Side</span>
+              <div class="segmented" id="ledgerSide" role="group" aria-label="Filter by debit or credit">
+                <button type="button" data-side="all" class="active">All</button>
+                <button type="button" data-side="debit">Debits</button>
+                <button type="button" data-side="credit">Credits</button>
+              </div>
+            </div>
+            <label class="filter-field">
+              <span>Category</span>
+              <select id="ledgerCategory"><option value="all">All categories</option></select>
+            </label>
+            <label class="filter-field">
+              <span>Sort by</span>
+              <select id="ledgerSort"></select>
+            </label>
+          </div>
+        </div>
+
+        <article class="panel ledger-panel">
+          <div class="ledger-panel-head">
+            <div><h2>Journal entries</h2><p id="ledgerShowing">No entries</p></div>
+            <button class="btn btn-quiet" type="button" data-action="export-filtered"><svg class="icon"><use href="#i-download"></use></svg>Export view</button>
+          </div>
+          <div class="table-shell">
+            <table class="ledger-table" id="ledgerTable">
+              <caption class="sr-only">Journal entries with date, particulars, debit, credit and row actions</caption>
+              <thead>
+                <tr>
+                  <th scope="col" data-sort-th="date"><button type="button" class="sort-btn" data-sort="date">Date<span class="sort-mark" aria-hidden="true"></span></button></th>
+                  <th scope="col" data-sort-th="particulars"><button type="button" class="sort-btn" data-sort="particulars">Particulars<span class="sort-mark" aria-hidden="true"></span></button></th>
+                  <th scope="col" class="align-right" data-sort-th="debit"><button type="button" class="sort-btn" data-sort="debit">Debit<span class="sort-mark" aria-hidden="true"></span></button></th>
+                  <th scope="col" class="align-right" data-sort-th="credit"><button type="button" class="sort-btn" data-sort="credit">Credit<span class="sort-mark" aria-hidden="true"></span></button></th>
+                  <th scope="col" class="col-actions"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody id="ledgerTableBody"></tbody>
+            </table>
+          </div>
+          <div class="ledger-cards" id="ledgerCards"></div>
+          <div class="empty-state" id="ledgerEmpty" hidden>
+            <span class="empty-mark"><svg class="icon"><use href="#i-ledger"></use></svg></span>
+            <h2 id="ledgerEmptyTitle">Your ledger is empty</h2>
+            <p id="ledgerEmptyText">Add your first line, or bring in an existing journal.</p>
+            <div class="empty-actions">
+              <button class="btn btn-primary" type="button" data-action="add"><svg class="icon"><use href="#i-plus"></use></svg>Add entry</button>
+              <button class="btn btn-secondary" type="button" data-goto="import">Import spreadsheet</button>
+            </div>
+          </div>
+          <footer class="ledger-footer" id="ledgerFooter" hidden>
+            <div class="filtered-totals">
+              <span>Filtered debits <strong class="money" id="footerDebit">₹0.00</strong></span>
+              <span>Credits <strong class="money" id="footerCredit">₹0.00</strong></span>
+              <span>Net <strong class="money" id="footerNet">₹0.00</strong></span>
+            </div>
+            <div class="ledger-footer-tools">
+              <label class="page-size-control">Rows<select id="ledgerPageSize" aria-label="Rows per page"></select></label>
+              <div class="pagination" id="ledgerPagination"></div>
+            </div>
+          </footer>
+        </article>
+
+        <div class="alltime-strip">
+          <span class="alltime-label"><svg class="icon"><use href="#i-database"></use></svg>All-time journal</span>
+          <span>Opening <strong class="money" id="allTimeOpening">₹0.00</strong></span>
+          <span>Total debits <strong class="money" id="allTimeDebit">₹0.00</strong></span>
+          <span>Total credits <strong class="money" id="allTimeCredit">₹0.00</strong></span>
+          <span>Net movement <strong class="money" id="allTimeNet">₹0.00</strong></span>
+          <span>Balance <strong class="money" id="allTimeBalance">₹0.00</strong></span>
+        </div>
+      </section>
+
+      <section class="view" id="reportsView" data-view-panel="reports" aria-labelledby="reportsTitle">
+        <header class="page-head">
+          <div class="page-heading">
+            <p class="eyebrow">The arithmetic, not a lecture</p>
+            <h1 id="reportsTitle">Reports</h1>
+            <p class="page-sub">Balances, patterns, and the lines that move your journal.</p>
+          </div>
+          <div class="page-head-tools">
+            <button class="btn btn-quiet report-export" type="button" data-action="export-report"><svg class="icon"><use href="#i-download"></use></svg>Export report</button>
+            <div class="period-control" data-period-control>
+              <span class="period-icon"><svg class="icon"><use href="#i-calendar"></use></svg></span>
+              <div class="period-body">
+                <select class="period-select" data-period-preset aria-label="Reporting period"></select>
+                <span class="period-range" data-period-range></span>
+              </div>
+              <div class="period-custom" data-period-custom hidden>
+                <label><span>From</span><input type="date" data-period-from min="1900-01-01" max="2100-12-31"></label>
+                <span class="period-arrow" aria-hidden="true">→</span>
+                <label><span>To</span><input type="date" data-period-to min="1900-01-01" max="2100-12-31"></label>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div class="report-kpis">
+          <article class="report-kpi"><span>Total debits</span><strong class="money debit-ink" id="reportDebit">₹0.00</strong><small id="reportDebitCaption">0 debit lines</small></article>
+          <article class="report-kpi"><span>Total credits</span><strong class="money credit-ink" id="reportCredit">₹0.00</strong><small id="reportCreditCaption">0 credit lines</small></article>
+          <article class="report-kpi report-kpi-net"><span>Net movement</span><strong class="money" id="reportNet">₹0.00</strong><small id="reportNetCaption">Credits − debits</small></article>
+          <article class="report-kpi"><span>Entries</span><strong class="money" id="reportCount">0</strong><small id="reportRangeCaption">This month</small></article>
+        </div>
+
+        <div class="reports-grid">
+          <article class="panel chart-panel report-chart-panel">
+            <div class="panel-head">
+              <div><h2>Movement over time</h2><p id="reportChartCaption">Debits and credits by period</p></div>
+              <span class="legend"><i class="legend-debit"></i>Debit <i class="legend-credit"></i>Credit</span>
+            </div>
+            <div class="bar-chart" id="reportChart"></div>
+          </article>
+          <article class="panel split-panel">
+            <div class="panel-head"><div><h2>Balance mix</h2><p>Debits against credits</p></div></div>
+            <div class="split-body">
+              <div class="donut" id="reportDonut"><div class="donut-hole"><strong id="reportDonutTotal" class="money">₹0</strong><small>movement</small></div></div>
+              <div class="split-legend" id="reportSplitLegend"></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="reports-lists">
+          <article class="panel rank-panel">
+            <div class="panel-head"><div><h2>Top debits</h2><p>Particulars taking the most out</p></div></div>
+            <div id="topDebitList" class="rank-list"></div>
+          </article>
+          <article class="panel rank-panel">
+            <div class="panel-head"><div><h2>Top credits</h2><p>Particulars bringing the most in</p></div></div>
+            <div id="topCreditList" class="rank-list"></div>
+          </article>
+        </div>
+
+        <div class="reports-lists reports-category-lists">
+          <article class="panel rank-panel">
+            <div class="panel-head"><div><h2>Spending by category</h2><p>Where debit movement is concentrated</p></div></div>
+            <div id="categoryDebitList" class="category-report-list"></div>
+          </article>
+          <article class="panel rank-panel">
+            <div class="panel-head"><div><h2>Income by category</h2><p>Where credit movement comes from</p></div></div>
+            <div id="categoryCreditList" class="category-report-list"></div>
+          </article>
+        </div>
+
+        <div class="reports-lists">
+          <article class="panel weekday-panel">
+            <div class="panel-head"><div><h2>Activity by weekday</h2><p>When journal lines are recorded</p></div></div>
+            <div id="weekdayChart" class="weekday-chart"></div>
+          </article>
+          <article class="panel largest-panel">
+            <div class="panel-head"><div><h2>Largest lines</h2><p>The entries with the biggest movement</p></div></div>
+            <div id="largestEntries" class="largest-list"></div>
+          </article>
+        </div>
+
+        <article class="panel report-note-panel">
+          <div class="report-note-icon"><svg class="icon"><use href="#i-reports"></use></svg></div>
+          <div><h2>Reading this report</h2><p id="reportNarrative">Add entries to see a plain-language summary of the period.</p></div>
+        </article>
+      </section>
+
+      <section class="view" id="goalsView" data-view-panel="goals" aria-labelledby="goalsTitle">
+        <header class="page-head">
+          <div class="page-heading">
+            <p class="eyebrow">Save with intention</p>
+            <h1 id="goalsTitle">Goals &amp; budgets</h1>
+            <p class="page-sub">A calm target for what you keep, and a limit for what you spend.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary" type="button" data-action="add"><svg class="icon"><use href="#i-plus"></use></svg>Add transaction</button>
+          </div>
+        </header>
+
+        <article class="planning-hero" aria-label="Savings goal">
+          <div class="planning-orb" aria-hidden="true"></div>
+          <div class="hero-copy">
+            <p class="hero-kicker">Savings goal <span class="planning-status" id="goalStatus">Not set</span></p>
+            <h2 class="goal-name" id="goalHeroName">Rainy day fund</h2>
+            <p class="hero-value money" id="goalCurrent">₹0.00</p>
+            <p class="hero-note" id="goalNote">Set a target and watch this journal become it.</p>
+            <div class="goal-progress" id="goalProgress" role="progressbar" aria-label="Savings goal progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="goalProgressFill"></span></div>
+            <div class="goal-progress-meta">
+              <strong id="goalProgressPercent">0%</strong>
+              <span id="goalTargetLabel">Target not set</span>
+            </div>
+            <div class="hero-actions">
+              <button class="btn btn-accent" type="button" data-action="edit-goal"><svg class="icon"><use href="#i-target"></use></svg>Set goal</button>
+              <button class="btn btn-ghost-on-dark" type="button" data-goto="ledger">Open transactions<svg class="icon"><use href="#i-arrow-right"></use></svg></button>
+            </div>
+          </div>
+          <div class="planning-side">
+            <div class="planning-stat"><span>Still to save</span><strong class="money" id="goalRemaining">₹0.00</strong></div>
+            <div class="planning-stat"><span>Journal balance</span><strong class="money" id="goalBalance">₹0.00</strong></div>
+            <p class="planning-hint">Progress follows your real journal balance. No separate account, no invented deposits.</p>
+          </div>
+        </article>
+
+        <div class="planning-grid">
+          <article class="panel budget-panel">
+            <div class="panel-head">
+              <div><h2>Monthly budget</h2><p id="budgetPeriodLabel">This month</p></div>
+              <button class="btn btn-secondary budget-edit" type="button" data-action="edit-budget"><svg class="icon"><use href="#i-edit"></use></svg>Set budget</button>
+            </div>
+            <div class="budget-body">
+              <div class="budget-ring" id="budgetRing" role="img" aria-label="Monthly budget used">
+                <div class="budget-ring-core">
+                  <strong id="budgetPercent">0%</strong>
+                  <small>used</small>
+                </div>
+              </div>
+              <div class="budget-metrics">
+                <div><span>Spent</span><strong class="money" id="budgetSpent">₹0.00</strong></div>
+                <div><span>Limit</span><strong class="money" id="budgetLimit">Not set</strong></div>
+                <div><span>Remaining</span><strong class="money" id="budgetRemaining">—</strong></div>
+              </div>
+            </div>
+            <div class="goal-progress budget-progress" id="budgetProgress" role="progressbar" aria-label="Monthly budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="budgetProgressFill"></span></div>
+            <p class="budget-note" id="budgetNote">Set a monthly limit to see how this month is tracking.</p>
+          </article>
+
+          <article class="panel category-spend-panel">
+            <div class="panel-head">
+              <div><h2>This month by category</h2><p>Debit movement, largest first</p></div>
+              <button class="btn btn-quiet" type="button" data-goto="reports">Analytics<svg class="icon"><use href="#i-arrow-right"></use></svg></button>
+            </div>
+            <div class="category-spend-list" id="goalCategoryList"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="accountsView" data-view-panel="accounts" aria-labelledby="accountsTitle">
+        <header class="page-head">
+          <div class="page-heading">
+            <p class="eyebrow">One honest balance</p>
+            <h1 id="accountsTitle">Accounts</h1>
+            <p class="page-sub">The account this journal tracks, with nothing implied that is not here.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" type="button" data-action="edit-account"><svg class="icon"><use href="#i-edit"></use></svg>Edit account</button>
+            <button class="btn btn-primary" type="button" data-action="add"><svg class="icon"><use href="#i-plus"></use></svg>Add transaction</button>
+          </div>
+        </header>
+
+        <article class="account-hero" aria-label="Tracked account">
+          <div class="account-hero-head">
+            <span class="account-mark"><svg class="icon"><use href="#i-wallet"></use></svg></span>
+            <div>
+              <p class="hero-kicker">Tracked account</p>
+              <h2 id="accountName">Main journal account</h2>
+              <p id="accountType">Cash &amp; bank</p>
+            </div>
+            <span class="account-status"><i aria-hidden="true"></i>Active</span>
+          </div>
+          <p class="account-balance-label">Current balance</p>
+          <p class="hero-value money" id="accountBalance">₹0.00</p>
+          <p class="hero-note">Opening balance, plus every credit, minus every debit.</p>
+          <div class="hero-actions">
+            <button class="btn btn-accent" type="button" data-action="add"><svg class="icon"><use href="#i-plus"></use></svg>Add transaction</button>
+            <button class="btn btn-ghost-on-dark" type="button" data-action="edit-opening">Adjust opening balance</button>
+          </div>
+        </article>
+
+        <div class="summary-grid account-summary" aria-label="Account totals">
+          <article class="summary-card"><span>Opening</span><strong class="money" id="accountOpening">₹0.00</strong><small>Journal start</small></article>
+          <article class="summary-card"><span>Total credits</span><strong class="money credit-ink" id="accountCredits">₹0.00</strong><small>Money in</small></article>
+          <article class="summary-card"><span>Total debits</span><strong class="money debit-ink" id="accountDebits">₹0.00</strong><small>Money out</small></article>
+          <article class="summary-card summary-net"><span>Entries</span><strong class="money" id="accountEntries">0</strong><small>All time</small></article>
+        </div>
+
+        <div class="accounts-grid">
+          <article class="panel account-activity-panel">
+            <div class="panel-head">
+              <div><h2>Recent activity</h2><p>The latest movement in this account</p></div>
+              <button class="btn btn-quiet" type="button" data-goto="ledger">View all<svg class="icon"><use href="#i-arrow-right"></use></svg></button>
+            </div>
+            <div id="accountActivity" class="account-activity"></div>
+          </article>
+          <article class="panel account-note-panel">
+            <span class="account-note-mark"><svg class="icon"><use href="#i-lock"></use></svg></span>
+            <h2>One account, accurately</h2>
+            <p>Moneta tracks one journal account. It does not imitate a bank connection or invent balances for accounts you have not recorded.</p>
+            <div class="account-note-actions">
+              <button class="btn btn-secondary" type="button" data-goto="settings">Opening balance</button>
+              <button class="btn btn-secondary" type="button" data-goto="data">Export statement</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="importView" data-view-panel="import" aria-labelledby="importTitle">
+        <header class="page-head">
+          <div class="page-heading">
+            <p class="eyebrow">Review before anything touches your journal</p>
+            <h1 id="importTitle">Import</h1>
+            <p class="page-sub">Bring in an Excel or CSV journal. Your file is read on this device.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" type="button" data-action="download-template"><svg class="icon"><use href="#i-download"></use></svg>Template</button>
+            <button class="btn btn-quiet" type="button" data-goto="ledger"><svg class="icon"><use href="#i-chevron-left"></use></svg>Back to ledger</button>
+          </div>
+        </header>
+
+        <article class="panel import-drop" id="importDrop">
+          <div class="import-drop-inner">
+            <span class="import-mark"><svg class="icon"><use href="#i-upload"></use></svg></span>
+            <div>
+              <h2>Bring in a spreadsheet</h2>
+              <p>Choose an Excel workbook or CSV. Columns are mapped to Date, Particulars, Debit and Credit, then checked row by row.</p>
+              <div class="import-formats"><span>.xlsx</span><span>.xls</span><span>.csv</span><em>Up to 15 MB</em></div>
+            </div>
+            <div class="import-drop-actions">
+              <button class="btn btn-primary" type="button" id="chooseImport"><svg class="icon"><use href="#i-file"></use></svg>Choose file</button>
+              <button class="btn btn-quiet" type="button" id="importTemplate">Download blank template</button>
+            </div>
+          </div>
+          <p class="import-file-label" id="importFileLabel" hidden></p>
+          <input type="file" id="importFile" accept=".xlsx,.xls,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
+        </article>
+
+        <div class="import-workspace" id="importWorkspace" hidden>
+          <div class="panel import-file-bar">
+            <div class="file-badge"><svg class="icon"><use href="#i-file"></use></svg></div>
+            <div class="file-meta"><strong id="importFileName">Spreadsheet</strong><small id="importFileMeta"></small></div>
+            <button class="btn btn-quiet" type="button" id="changeImportFile">Choose another file</button>
+          </div>
+
+          <div class="panel import-controls-panel">
+            <div class="import-section-head">
+              <div><h2>Worksheet &amp; rules</h2><p>Confirm how dates and duplicate rows should be handled.</p></div>
+            </div>
+            <div class="import-controls import-controls-four">
+              <label class="field"><span>Worksheet</span><select id="importSheet"></select></label>
+              <label class="field"><span>Header row</span><select id="importHeaderRow"></select></label>
+              <label class="field"><span>Date order</span><select id="importDateFormat">
+                <option value="dmy">Day first · 01/10/2026 = 1 Oct</option>
+                <option value="mdy">Month first · 01/10/2026 = 10 Jan</option>
+                <option value="auto">Detect · flag ambiguous dates</option>
+              </select></label>
+              <label class="field"><span>Duplicates</span><select id="importDuplicates">
+                <option value="skip">Skip rows already in the journal</option>
+                <option value="all">Import every valid row</option>
+              </select></label>
+            </div>
+            <p class="field-hint" id="importDateFormatHint">Dates with year first (2026-10-01) and month names are always read unambiguously. Identical lines within one spreadsheet are treated as separate transactions.</p>
+          </div>
+
+          <div class="panel mapping-panel">
+            <div class="import-section-head">
+              <div><h2>Match the columns</h2><p id="importSheetMeta">Choose a worksheet to begin.</p></div>
+            </div>
+            <div class="mapping-grid">
+              <label class="field"><span>Date</span><select id="mapDate" data-map="date"></select></label>
+              <label class="field"><span>Particulars</span><select id="mapParticulars" data-map="particulars"></select></label>
+              <label class="field"><span>Debit</span><select id="mapDebit" data-map="debit"></select></label>
+              <label class="field"><span>Credit</span><select id="mapCredit" data-map="credit"></select></label>
+              <label class="field"><span>Category <em>optional</em></span><select id="mapCategory" data-map="category"></select></label>
+            </div>
+            <p class="field-hint">If the sheet has no category column, Moneta reads common merchant and banking terms to suggest one. You can edit any entry later.</p>
+          </div>
+
+          <div class="import-summary" id="importSummary" aria-live="polite"></div>
+          <div class="panel import-reconciliation" id="importReconciliation" hidden>
+            <span class="reconcile-mark" id="importReconcileMark"><svg class="icon"><use href="#i-check"></use></svg></span>
+            <div class="reconcile-copy">
+              <span class="reconcile-kicker">Balance in this sheet</span>
+              <strong class="money" id="importSheetBalance">₹0.00</strong>
+              <p id="importReconcileText">Moneta can make your journal land on the sheet's account balance.</p>
+              <span class="reconcile-projection" id="importReconcileProjection">Balance after import <strong class="money" id="importProjectedBalance">₹0.00</strong></span>
+            </div>
+            <label class="switch-row" id="importMatchRow">
+              <input type="checkbox" id="importMatchBalance">
+              <span class="switch-ui" aria-hidden="true"></span>
+              <span class="switch-label">Match balance</span>
+            </label>
+          </div>
+
+          <div class="panel import-preview-panel">
+            <div class="import-section-head">
+              <div><h2>Review rows</h2><p id="importPreviewCaption">Nothing imported yet.</p></div>
+              <button class="btn btn-quiet" type="button" id="downloadImportErrors" hidden><svg class="icon"><use href="#i-download"></use></svg>Error report</button>
+            </div>
+            <div class="import-preview-wrap">
+              <table class="import-preview">
+                <thead><tr><th>Row</th><th>Date</th><th>Particulars</th><th class="align-right">Debit</th><th class="align-right">Credit</th><th>Review</th></tr></thead>
+                <tbody id="importPreviewRows"></tbody>
+              </table>
+            </div>
+            <div class="import-preview-cards" id="importPreviewCards"></div>
+            <p class="preview-limit" id="importPreviewLimit" hidden></p>
+            <div class="import-footer">
+              <p id="importValidationNote">No records have been added yet.</p>
+              <div class="import-actions">
+                <button class="btn btn-secondary" type="button" id="cancelImport">Cancel</button>
+                <button class="btn btn-primary" type="button" id="confirmImport" disabled>Import valid rows</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <article class="panel import-history" id="importHistory" hidden>
+          <div class="panel-head"><div><h2>Recent imports</h2><p>Stored on this device alongside your journal.</p></div></div>
+          <div id="importHistoryRows" class="import-history-rows"></div>
+        </article>
+      </section>
+
+      <section class="view" id="dataView" data-view-panel="data" aria-labelledby="dataTitle">
+        <header class="page-head">
+          <div class="page-heading">
+            <p class="eyebrow">Your records belong to you</p>
+            <h1 id="dataTitle">Data</h1>
+            <p class="page-sub">Export four clean columns, or take a complete backup with settings.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" type="button" data-action="backup"><svg class="icon"><use href="#i-download"></use></svg>Backup now</button>
+            <button class="btn btn-quiet" type="button" data-goto="settings"><svg class="icon"><use href="#i-settings"></use></svg>Settings</button>
+          </div>
+        </header>
+
+        <div class="data-summary" id="dataSummary"></div>
+
+        <div class="export-grid">
+          <article class="panel export-card feature-export">
+            <span class="export-icon"><svg class="icon"><use href="#i-reports"></use></svg></span>
+            <div>
+              <h2>Four-column journal</h2>
+              <p><strong>Date · Particulars · Debit · Credit.</strong> A clean workbook for Excel or any accounting tool. Amounts keep two decimal places.</p>
+            </div>
+            <div class="export-actions">
+              <button class="btn btn-primary" type="button" data-action="export-xlsx">Download XLSX</button>
+              <button class="btn btn-secondary" type="button" data-action="export-csv">Download CSV</button>
+            </div>
+          </article>
+          <article class="panel export-card">
+            <span class="export-icon"><svg class="icon"><use href="#i-database"></use></svg></span>
+            <div>
+              <h2>Complete backup</h2>
+              <p>Journal entries, import history and every preference in one validated JSON file. Restore it on this device or a new one.</p>
+            </div>
+            <div class="export-actions">
+              <button class="btn btn-secondary" type="button" data-action="backup">Download backup</button>
+            </div>
+          </article>
+          <article class="panel export-card">
+            <span class="export-icon"><svg class="icon"><use href="#i-upload"></use></svg></span>
+            <div>
+              <h2>Restore</h2>
+              <p>Choose a Moneta backup. It is fully checked before you confirm, and replaces the journal only after you approve it.</p>
+            </div>
+            <div class="export-actions">
+              <label class="btn btn-secondary file-btn">Choose backup<input type="file" id="restoreFile" accept=".json,application/json" hidden></label>
+            </div>
+          </article>
+        </div>
+
+        <div class="data-grid">
+          <article class="panel storage-panel">
+            <div class="panel-head"><div><h2>On this device</h2><p>Local IndexedDB storage. Nothing is uploaded.</p></div><span class="status-chip"><span class="status-dot"></span>Offline</span></div>
+            <div class="storage-body" id="storageBody"></div>
+            <div class="storage-bar"><span id="storageFill"></span></div>
+          </article>
+          <article class="panel history-panel">
+            <div class="panel-head">
+              <div><h2>Import history</h2><p>Covering the last spreads you brought in.</p></div>
+              <button class="btn btn-quiet" type="button" data-action="clear-import-history">Clear history</button>
+            </div>
+            <div id="dataImportHistory" class="data-import-history"></div>
+          </article>
+        </div>
+
+        <article class="panel danger-strip">
+          <div>
+            <h2>Remove data</h2>
+            <p>Delete every journal line while keeping your settings, or clear the whole workspace. Download a backup first.</p>
+          </div>
+          <div class="danger-strip-actions">
+            <button class="btn btn-danger" type="button" data-action="delete-all-entries">Delete all entries</button>
+            <button class="btn btn-danger" type="button" data-action="clear-all">Clear everything</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="view" id="settingsView" data-view-panel="settings" aria-labelledby="settingsTitle">
+        <header class="page-head">
+          <div class="page-heading">
+            <p class="eyebrow">Make it feel like yours</p>
+            <h1 id="settingsTitle">Settings</h1>
+            <p class="page-sub">Appearance, formatting and ledger defaults. Changes save automatically.</p>
+          </div>
+        </header>
+
+        <div class="settings-layout">
+          <section class="settings-row">
+            <div class="settings-label"><h2>Appearance</h2><p>Follow your device, or pick a side.</p></div>
+            <div class="panel settings-panel">
+              <div class="theme-choice" role="group" aria-label="Theme">
+                <button type="button" data-theme-choice="system"><svg class="icon"><use href="#i-monitor"></use></svg><span>System</span><small>Follow this device</small></button>
+                <button type="button" data-theme-choice="light"><svg class="icon"><use href="#i-sun"></use></svg><span>Light</span><small>Bright paper</small></button>
+                <button type="button" data-theme-choice="dark"><svg class="icon"><use href="#i-moon"></use></svg><span>Dark</span><small>Low glare</small></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-row">
+            <div class="settings-label"><h2>Display &amp; format</h2><p>The currency and date notation used across the ledger.</p></div>
+            <div class="panel settings-panel">
+              <div class="field-grid">
+                <label class="field"><span>Display currency</span><select id="settingsCurrency"></select><small>Symbols only. Amounts are never converted.</small></label>
+                <label class="field"><span>Date format</span><select id="settingsDateFormat"></select><small id="dateFormatExample">Example · 26 Oct 2026</small></label>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-row">
+            <div class="settings-label"><h2>Account balance</h2><p>An opening figure lets the journal match a real bank balance.</p></div>
+            <div class="panel settings-panel">
+              <div class="field-grid">
+                <label class="field"><span>Opening balance</span>
+                  <div class="currency-input"><span data-currency-symbol>₹</span><input id="settingsOpeningBalance" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
+                  <small>Balance at the start of your journal.</small>
+                </label>
+                <label class="field"><span>Opening side</span><select id="settingsOpeningSide">
+                  <option value="credit">Credit · positive balance</option>
+                  <option value="debit">Debit · overdrawn balance</option>
+                </select><small>Use debit if the account started negative.</small></label>
+              </div>
+              <div class="account-preview">
+                <span>Current account balance</span>
+                <strong class="money" id="settingsCurrentBalance">₹0.00</strong>
+                <small>Opening balance + all credits − all debits</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-row">
+            <div class="settings-label"><h2>Ledger defaults</h2><p>How a fresh ledger opens.</p></div>
+            <div class="panel settings-panel">
+              <div class="field-grid">
+                <label class="field"><span>Default sort</span><select id="settingsSort"></select></label>
+                <label class="field"><span>Rows per page</span><select id="settingsPageSize"></select></label>
+              </div>
+              <p class="settings-note">Click a column heading in the ledger to sort temporarily. This preference is the starting order.</p>
+            </div>
+          </section>
+
+          <section class="settings-row">
+            <div class="settings-label"><h2>Categories</h2><p>A short list keeps reports honest. Every entry belongs to one category.</p></div>
+            <div class="panel settings-panel">
+              <div class="category-manager-head">
+                <div>
+                  <strong id="categoryManagerCount">7 of 7 categories</strong>
+                  <small>Keep between 5 and 7. Renaming updates every linked entry.</small>
+                </div>
+                <button class="btn btn-secondary" type="button" data-action="add-category"><svg class="icon"><use href="#i-plus"></use></svg>Add category</button>
+              </div>
+              <div id="categoryManagerList" class="category-manager-list"></div>
+              <p class="settings-note" id="categoryManagerNote">Imports and new entries are folded into this list. Nothing is left uncategorised.</p>
+            </div>
+          </section>
+
+          <section class="settings-row">
+            <div class="settings-label"><h2>Your data</h2><p>Keep a copy, restore one, or start again.</p></div>
+            <div class="panel settings-panel">
+              <div class="settings-actions">
+                <button class="btn btn-secondary" type="button" data-goto="data"><svg class="icon"><use href="#i-database"></use></svg>Open data &amp; exports</button>
+                <button class="btn btn-secondary" type="button" data-action="backup"><svg class="icon"><use href="#i-download"></use></svg>Download backup</button>
+                <label class="btn btn-secondary file-btn">Restore backup<input type="file" id="settingsRestoreFile" accept=".json,application/json" hidden></label>
+              </div>
+              <div class="danger-zone">
+                <div class="danger-item">
+                  <div><strong>Delete all entries</strong><p>Remove every journal line but keep your settings and import history.</p></div>
+                  <button class="btn btn-danger" type="button" data-action="delete-all-entries">Delete entries</button>
+                </div>
+                <div class="danger-item">
+                  <div><strong>Clear all data</strong><p>This deletes the journal, import history and preferences. It cannot be undone.</p></div>
+                  <button class="btn btn-danger" type="button" data-action="clear-all">Clear everything</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-row">
+            <div class="settings-label"><h2>About</h2><p>Quiet software for your own numbers.</p></div>
+            <div class="panel settings-panel about-panel">
+              <div class="about-brand"><span class="brand-mark">m</span><div><strong>Moneta</strong><small>Journal ledger · v2.0.0</small></div></div>
+              <div class="about-grid">
+                <div><span>Storage</span><strong>IndexedDB · schema v3</strong></div>
+                <div><span>Privacy</span><strong>No account, no server, no tracking</strong></div>
+                <div><span>Money precision</span><strong>Integer minor units · two decimals</strong></div>
+                <div><span>Offline</span><strong>Installable PWA &amp; Android app</strong></div>
+              </div>
+              <button class="btn btn-secondary" type="button" id="installApp" hidden>Install Moneta on this device</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<nav class="mobile-dock" id="mobileDock" aria-label="Primary">
+  <div class="dock-surface">
+    <span class="dock-indicator" id="dockIndicator" aria-hidden="true"></span>
+    <button class="dock-tab active" type="button" data-view="overview" aria-label="Home" aria-current="page">
+      <span class="dock-icon"><svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg></span>
+    </button>
+    <button class="dock-tab" type="button" data-view="ledger" aria-label="Transactions">
+      <span class="dock-icon"><svg class="icon" aria-hidden="true"><use href="#i-receipt"></use></svg></span>
+    </button>
+    <button class="dock-tab" type="button" data-view="reports" aria-label="Analytics">
+      <span class="dock-icon"><svg class="icon" aria-hidden="true"><use href="#i-chart"></use></svg></span>
+    </button>
+    <button class="dock-tab" type="button" data-view="goals" aria-label="Goals">
+      <span class="dock-icon"><svg class="icon" aria-hidden="true"><use href="#i-target"></use></svg></span>
+    </button>
+    <button class="dock-tab" type="button" data-view="accounts" aria-label="Accounts">
+      <span class="dock-icon"><svg class="icon" aria-hidden="true"><use href="#i-wallet"></use></svg></span>
+    </button>
+  </div>
+</nav>
+
+<div class="app-loader" id="appLoader" role="status" aria-live="polite">
+  <div class="loader-stage">
+    <div class="loader-mark" aria-hidden="true"><span>m</span></div>
+    <div class="loader-word" aria-hidden="true">moneta</div>
+    <p class="loader-copy">Opening your journal<span class="loader-dots" aria-hidden="true"><i></i><i></i><i></i></span></p>
+    <div class="loader-track" aria-hidden="true"><span></span></div>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/db.js"></script>
+<script src="js/controls.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

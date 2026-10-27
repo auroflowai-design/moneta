@@ -1,0 +1,25 @@
+{
+  "count": 86,
+  "debit": "104040.75",
+  "credit": "126477.50",
+  "net": "22436.75",
+  "openingBalance": "10000.00",
+  "accountBalance": "32436.75",
+  "categories": {
+    "Uncategorised": "22758.25",
+    "Rent": "18000.00",
+    "Education": "12500.00",
+    "Shopping": "8841.75",
+    "Transfers": "8607.50",
+    "Travel": "8420.00",
+    "Groceries": "7497.50",
+    "Investments": "5000.00",
+    "Cash & ATM": "3000.00",
+    "Bills & Utilities": "2647.25",
+    "Food & Dining": "2150.50",
+    "Transport": "1948.00",
+    "Fees & Charges": "1709.00",
+    "Entertainment": "649.00",
+    "Health": "312.00"
+  }
+}

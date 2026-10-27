@@ -1,0 +1,13 @@
+node_modules/
+.taste-skill/
+dist/
+.tmp-splash/
+android/.gradle/
+android/local.properties
+android/app/build/
+android/build/
+www/
+android/keystore.properties
+android/KEYSTORE.txt
+android/*.jks
+android/*.keystore

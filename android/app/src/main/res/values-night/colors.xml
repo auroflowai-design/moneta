@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="monetaPaper">#0B0D10</color>
+    <color name="monetaInk">#F4F5F7</color>
+    <color name="splashBackground">#0B0D10</color>
+    <color name="bootBackground">#0B0D10</color>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#171819</color>
+    <color name="colorPrimaryDark">#171819</color>
+    <color name="colorAccent">#B8E9D0</color>
+    <color name="monetaPaper">#F4F4F2</color>
+    <color name="monetaInk">#171819</color>
+    <color name="monetaDark">#18191B</color>
+    <color name="monetaMint">#B8E9D0</color>
+    <color name="splashBackground">#F4F4F2</color>
+    <color name="bootBackground">#F4F4F2</color>
+</resources>

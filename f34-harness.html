@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moneta · Galaxy F34 viewport</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: #070a08 radial-gradient(700px 400px at 50% 0%, #162016, transparent 70%);
+    font-family: "Segoe UI", sans-serif;
+    color: #d8e0d4;
+  }
+  .phone {
+    position: relative;
+    width: 376px;
+    padding: 7px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 34px;
+    background: linear-gradient(160deg, #2a302b, #0b0e0c 45%);
+    box-shadow: 0 40px 100px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.13);
+  }
+  .screen {
+    position: relative;
+    height: var(--screen-h, 780px);
+    border-radius: 27px;
+    overflow: hidden;
+    background: #0c100e;
+    isolation: isolate;
+  }
+  .screen iframe {
+    display: block;
+    width: 360px;
+    height: var(--screen-h, 780px);
+    border: 0;
+    background: #0c100e;
+  }
+  .notch {
+    position: absolute;
+    top: 9px;
+    left: 50%;
+    z-index: 3;
+    width: 74px;
+    height: 16px;
+    margin-left: -37px;
+    border-radius: 999px;
+    background: #050706;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    pointer-events: none;
+  }
+  .meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 15px 8px 3px;
+    color: #7d8a7e;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .meta strong { color: #b9c7b8; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen" id="screen">
+      <span class="notch" aria-hidden="true"></span>
+      <iframe id="appFrame" title="Moneta app at Galaxy F34 viewport" src="index.html#overview"></iframe>
+    </div>
+    <div class="meta"><strong>Galaxy F34 5G</strong><span id="size">360 × 780</span></div>
+  </div>
+<script>
+  const params = new URLSearchParams(location.search);
+  const height = Number(params.get('h')) || 780;
+  const view = params.get('view') || 'overview';
+  const theme = params.get('theme');
+  const screen = document.getElementById('screen');
+  const frame = document.getElementById('appFrame');
+  screen.style.setProperty('--screen-h', height + 'px');
+  document.getElementById('size').textContent = `360 × ${height}`;
+  frame.src = `index.html?theme=${encodeURIComponent(theme || '')}#${view}`;
+</script>
+</body>
+</html>
