@@ -4,6 +4,12 @@ Moneta is an offline-first personal ledger built around a canonical four-column
 journal: **Date | Particulars | Debit | Credit**. It runs entirely on the device.
 There is no account, no server, and no tracking.
 
+<p align="center">
+  <img src="docs/moneta-overview.png" alt="Moneta overview on Android" width="300">
+</p>
+
+<p align="center"><strong><a href="https://github.com/auroflowai-design/moneta/releases/latest">Download the Android APK</a></strong></p>
+
 ## Features
 
 - **Journal ledger** with search, date/date-range, category and amount filters,
